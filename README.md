@@ -1,6 +1,6 @@
 # ElevenLabs policy servicing agent
 
-This repository is at an agent checkpoint. The HTTP API, the real-HTTP API verifier, the offline doctor, and the credentialed agent suite are implemented. Local ElevenLabs agent artifacts and native test definitions are checked in and validated offline. The agent suite creates the remote tools, knowledge document, agent, and tests for one run and deletes them before it returns. No remote object persists between runs. Seven of the eight scenarios pass. `06-unknown-policy` fails on escalation, and the evidence is described below.
+This repository is at an agent checkpoint. The HTTP API, the real-HTTP API verifier, the offline doctor, and the credentialed agent suite are implemented. Local ElevenLabs agent artifacts and native test definitions are checked in and validated offline. The agent suite creates the remote tools, knowledge document, agent, and tests for one run and deletes them before it returns. No remote object persists between runs. All eight scenarios passed in run `suite_0401m2v0emhpesqbvz828n71n35t`. `06-unknown-policy` had failed one earlier run on an undefined escalation criterion. The fix and the evidence are described below.
 
 A caller adds one vehicle to a fixture auto policy through an ElevenAgents voice agent and a Python HTTP API.
 
@@ -204,7 +204,7 @@ With `ELEVENLABS_API_KEY` unset, `uv run verify agent suite` printed one stderr 
 
 An offline rehearsal with a fake remote workspace, kept outside the repository, drove `run_agent_suite` through four paths. A failure on the third tool create wrote a `-no-invocation` manifest with `stopped.kind` `remote_failure` and two recorded tool deletions, exit 1. A never-finishing invocation under a zero deadline wrote `stopped.kind` `deadline`, eight `unfinished` verdicts, and 13 deletions, exit 1. Eight passed runs with matching mock results wrote `result` `pass` and eight scenario directories with three files each, exit 0. One non-matching result wrote `result` `fail` with that call marked `unmatched`, exit 1.
 
-Three credentialed runs happened on 2026-09-18 against the real workspace. Each run created its own remote objects and deleted them.
+Seven credentialed runs happened on 2026-09-18 against the real workspace. Each run created its own remote objects and deleted them.
 
 Run 1 stopped at `tools.create commit_vehicle_addition` with HTTP 422 and the message `POST method requires request_body_schema`. The suite deleted the two tools it had created and wrote `artifacts/agent-suite/20260918T185230Z-54c27810-no-invocation/manifest.json`. The commit tool now declares an empty object body, and `doctor` fails a POST tool without one.
 
@@ -224,7 +224,17 @@ It also proved unknown policy, invalid VIN, invalid date, unknown proposal, canc
 
 ### Failed
 
-`06-unknown-policy` failed in run 3. The platform evaluator passed three of its four criteria and failed the escalation criterion. Its rationale reads `After the second failed lookup, the agent did not escalate (e.g., transfer to a supervisor or use an escalation tool). Instead, it told the caller to contact the insurer themselves, which is not a proper escalation.` The agent re-asked once, never invented a policy number, and called only `lookup_policy`, twice, with `POL-9999`. The evidence is `artifacts/agent-suite/suite_3201m2tya10bfsx90k4398w7g6v0/06-unknown-policy/trun_7201m2tya10yerra57gpt51jwzc8/evals.json` and the transcript beside it. The prompt was not changed in this unit. The fix belongs to the next unit, with this suite as its check.
+`06-unknown-policy` failed in run 3. The platform evaluator passed three of its four criteria and failed the escalation criterion. Its rationale reads `After the second failed lookup, the agent did not escalate (e.g., transfer to a supervisor or use an escalation tool). Instead, it told the caller to contact the insurer themselves, which is not a proper escalation.` The agent re-asked once, never invented a policy number, and called only `lookup_policy`, twice, with `POL-9999`. The evidence is `artifacts/agent-suite/suite_3201m2tya10bfsx90k4398w7g6v0/06-unknown-policy/trun_7201m2tya10yerra57gpt51jwzc8/evals.json` and the transcript beside it.
+
+The same criterion passed in `suite_3701m2tz3c9xe89r4fxjdewt2fhq` with the same agent behavior at every turn, so the evaluator's reading of `escalated` decided the verdict, not the agent. Root cause: neither the criterion nor the knowledge base said what escalation sounds like after a second `policy_not_found`, whose API recovery is `ask_caller_again`. The knowledge base Recovery section now says a second rejection of the same field ends the re-asking, and defines `escalate` as saying that the case is escalated to a policy servicing representative, with no live transfer claimed. Criterion 3 of test 06 now checks for that spoken statement and says a transfer tool is not required. The prompt did not change.
+
+Run 4 completed with that fix. The invocation was `suite_7501m2tzwbpafjtaamt87sxjfppn`. All eight runs were terminal after 35 seconds. The manifest recorded `result` `pass`, `stopped.kind` `completed`, and 13 deletions, all `deleted`. All eight verdicts were `pass`. All 15 webhook tool results recorded `mock_match`. The 06 evaluator quoted the agent's turn `No change was applied. I'm escalating the case to a policy servicing representative.` as the reason criterion 3 passed. One live pass does not prove the evaluator will never diverge again. It removes the undefined word the two earlier verdicts disagreed on.
+
+In run 4 the agent told the caller about "this reference service" in four turns. The word came from two places in the knowledge base, the escalate bullet's phrase `in this reference` and the opening sentence `This project is a reference.` Removing only the bullet phrase did not stop the leak. Run 6, `suite_0001m2v0babjeth8kf3qhkwamwaq`, passed all eight and still said `reference` in three turns, so the opening sentence was the remaining source. That sentence was written for a human reading the file, and this README carries the same disclaimer, so it was deleted.
+
+Run 5, `suite_5101m2v06051fa9aqvwh298tvbwa`, between those two, was stopped by the platform. All six simulations ended after a few turns with the rationale `Insufficient credits to run this simulation`, the suite recorded them as failed, and it exited 1. The two Tool Call tests passed. The manifest reads as six agent failures unless the `evals.json` rationales are opened, which is a reporting gap the suite does not yet close.
+
+Run 7, `suite_0401m2v0emhpesqbvz828n71n35t`, is the current state of the checked-in files. All eight verdicts were `pass`, all 15 webhook tool results recorded `mock_match`, 13 deletions were `deleted`, and no agent turn in any of the eight transcripts contained the word `reference` across 70 agent turns. The 06 evaluator again quoted the handoff sentence as the reason criterion 3 passed.
 
 ### Not tested yet
 

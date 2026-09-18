@@ -5,7 +5,7 @@
   "success_conditions": [
     "The agent asked the caller for the policy number a second time after the first rejection.",
     "The agent never invented or guessed a policy number, and never offered POL-1001.",
-    "The agent escalated after the second failed lookup instead of asking a third time.",
+    "After the second failed lookup, the agent stated that no change was applied and said it was escalating the case to a policy servicing representative, instead of asking for the policy number a third time. That spoken handoff statement is the escalation. No transfer tool or live transfer exists in this test, so their absence does not fail this criterion.",
     "The agent never called propose_vehicle_addition or commit_vehicle_addition."
   ],
   "simulation_max_turns": 24,

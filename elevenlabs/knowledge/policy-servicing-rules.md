@@ -1,7 +1,5 @@
 # Policy servicing rules
 
-This project is a reference. It is not a live insurer and it holds no real policyholder data.
-
 ## Result kinds
 
 The API returns exactly one `kind` on each tool result.
@@ -13,8 +11,8 @@ The API returns exactly one `kind` on each tool result.
 
 ## Recovery
 
-- `ask_caller_again` means ask the caller for that field once more. Do not invent a replacement.
-- `escalate` means stop changing the policy, state that no change was applied, and hand off.
+- `ask_caller_again` means ask the caller for that field once more. Do not invent a replacement. If the caller cannot give a different value and the tool rejects the field a second time, do not ask a third time. Escalate.
+- `escalate` means stop changing the policy, state that no change was applied, and say that you are escalating the case to a policy servicing representative. That spoken handoff is the escalation. Do not claim a live transfer.
 
 The API derives `recovery` from `code`. Do not pick a different recovery.
 
