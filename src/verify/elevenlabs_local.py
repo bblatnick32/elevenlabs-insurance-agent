@@ -531,17 +531,25 @@ def _tool_failures(agent: LocalAgent) -> Iterator[ArtifactFailure]:
             )
         body = config.api_schema.request_body_schema
         body_ptr = "/tool_config/api_schema/request_body_schema"
-        if not contract.body_fields:
-            if body is not None:
-                yield _fail(relative, f"{body_ptr}: commit and lookup have no body")
-        elif body is None:
-            yield _fail(relative, f"{body_ptr}: missing")
-        else:
-            fields = set(contract.body_fields)
-            required = set(body.required or [])
-            properties = set(body.properties or {})
-            if required != fields or properties != fields:
-                yield _fail(relative, f"{body_ptr}: must be vin and effective_date")
+        match contract.method:
+            case "GET":
+                if body is not None:
+                    yield _fail(relative, f"{body_ptr}: GET tools have no body")
+            case "POST":
+                if body is None:
+                    yield _fail(
+                        relative,
+                        f"{body_ptr}: missing; POST tools must declare request_body_schema",
+                    )
+                else:
+                    fields = set(contract.body_fields)
+                    required = set(body.required or [])
+                    properties = set(body.properties or {})
+                    if required != fields or properties != fields:
+                        yield _fail(
+                            relative,
+                            f"{body_ptr}: properties and required must be exactly {sorted(fields)}",
+                        )
         mocks = tool.response_mocks or []
         if not mocks:
             yield _fail(relative, "/response_mocks: must be nonempty")
@@ -599,9 +607,15 @@ def _test_failures(agent: LocalAgent) -> Iterator[ArtifactFailure]:
                     "/tool_mock_config: must be mocking_strategy all and "
                     "fallback_strategy raise_error",
                 )
-            eval_m, user_m = payload.evaluation_model, payload.simulated_user_model
-            yield from _must(relative, "/evaluation_model", eval_m, LLM)
-            yield from _must(relative, "/simulated_user_model", user_m, LLM)
+            for pointer, value in (
+                ("/evaluation_model", payload.evaluation_model),
+                ("/simulated_user_model", payload.simulated_user_model),
+            ):
+                if value is not None:
+                    yield _fail(
+                        relative,
+                        f"{pointer}: must be unset so the platform default applies",
+                    )
             continue
         if not isinstance(payload, TestsCreateRequestBody_Tool):
             continue

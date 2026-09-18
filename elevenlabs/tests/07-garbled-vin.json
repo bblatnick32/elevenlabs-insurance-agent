@@ -12,7 +12,5 @@
   "tool_mock_config": {
     "mocking_strategy": "all",
     "fallback_strategy": "raise_error"
-  },
-  "evaluation_model": "gpt-5.6-sol",
-  "simulated_user_model": "gpt-5.6-sol"
+  }
 }

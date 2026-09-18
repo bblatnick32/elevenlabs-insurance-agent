@@ -1,7 +1,5 @@
 import json
-import secrets
 import shutil
-import subprocess
 import threading
 import time
 from datetime import UTC, datetime, timedelta
@@ -15,6 +13,7 @@ from pydantic import ValidationError
 
 from insurance_agent.http import create_app, parse_api_result
 from insurance_agent.store import Store
+from verify.artifacts import Json, git_commit, repo_root, utc_stamp, write_json
 
 FIXED_INSTANT = datetime(2026, 9, 17, 20, 45, 12, tzinfo=UTC)
 NEW_YORK = ZoneInfo("America/New_York")
@@ -25,8 +24,6 @@ CONTRACT_PROPOSAL_ID = "vap_01K5EPJ7R9QY6M8B4T2D3F1H0C"
 POL3003_PROPOSAL_ID = "vap_01K5EPJ7R9QY6M8B4T2D3F1H0D"
 STATUS_RECHECK_ID = "vap_01K5EPJ7R9QY6M8B4T2D3F1H0E"
 CONTRACT_CONFIRMATION = "CHG-2026-0917-0031"
-
-type Json = dict[str, Json] | list[Json] | str | int | float | bool | None
 
 
 class MutableClock:
@@ -97,31 +94,6 @@ class Recorder:
             row["expected"] = expected
             self.failed = True
         self.verdicts.append(row)
-
-
-def repo_root() -> Path:
-    return Path(__file__).resolve().parents[2]
-
-
-def git_commit(root: Path) -> str | None:
-    try:
-        completed = subprocess.run(
-            ["git", "rev-parse", "HEAD"],
-            cwd=root,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-    except OSError:
-        return None
-    if completed.returncode != 0:
-        return None
-    value = completed.stdout.strip()
-    return value or None
-
-
-def write_json(path: Path, payload: object) -> None:
-    path.write_text(json.dumps(payload, indent=2) + "\n")
 
 
 def _deref(openapi: dict[str, Json], node: Json) -> dict[str, Json]:
@@ -226,7 +198,7 @@ def stop_server(server: uvicorn.Server, thread: threading.Thread) -> None:
 
 def run_api_suite(*, promote: bool) -> int:
     root = repo_root()
-    run_id = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ") + "-" + secrets.token_hex(4)
+    run_id = utc_stamp()
     run_dir = root / "artifacts" / "api-suite" / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
     contracts = root / "contracts"

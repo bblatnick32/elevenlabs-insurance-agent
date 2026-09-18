@@ -7,11 +7,17 @@
     "api_schema": {
       "url": "https://local.invalid/v1/vehicle-addition-proposals/{proposal_id}/commit",
       "method": "POST",
+      "content_type": "application/json",
       "path_params_schema": {
         "proposal_id": {
           "type": "string",
           "description": "proposal_id from the most recent confirmation_ready result."
         }
+      },
+      "request_body_schema": {
+        "type": "object",
+        "description": "Empty body. The proposal_id path parameter identifies the change.",
+        "properties": {}
       }
     }
   },

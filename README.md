@@ -1,6 +1,6 @@
 # ElevenLabs policy servicing agent
 
-This repository is at an API checkpoint. The HTTP API and the real-HTTP API verifier are implemented. Local ElevenLabs agent artifacts and native test definitions are checked in and validated offline. No remote agent, tool, knowledge document, or test exists.
+This repository is at an agent checkpoint. The HTTP API, the real-HTTP API verifier, the offline doctor, and the credentialed agent suite are implemented. Local ElevenLabs agent artifacts and native test definitions are checked in and validated offline. The agent suite creates the remote tools, knowledge document, agent, and tests for one run and deletes them before it returns. No remote object persists between runs. Seven of the eight scenarios pass. `06-unknown-policy` fails on escalation, and the evidence is described below.
 
 A caller adds one vehicle to a fixture auto policy through an ElevenAgents voice agent and a Python HTTP API.
 
@@ -78,15 +78,15 @@ Transcript-evaluated rules are later measured by `uv run verify agent suite`.
 
 Text Simulation tests do not prove caller identity, legal consent, audio quality, or telephony ASR of a 17-character VIN. If independent consent proof is required, stop and add an authenticated confirmation channel outside this project.
 
-## Planned current ElevenAgents stack
+## ElevenAgents stack
 
-The planned stack is the following.
+The stack is the following.
 
 - Use the official Python SDK and `uv`.
 - Reference standalone webhook tools through `conversation_config.agent.prompt.tool_ids`. Do not use deprecated inline `prompt.tools`.
 - Set `tool_error_handling_mode` to `passthrough` on each webhook tool.
 - Run native Simulation and Tool Call tests through `agents.run_tests`. Do not use deprecated `simulate_conversation` endpoints or deprecated singular `success_condition`.
-- Pin the LLM to `gpt-5.6-sol` and TTS to `eleven_v3_conversational`. Credentialed doctor checks must confirm that both are still available before a run.
+- Pin the agent LLM to `gpt-5.6-sol` and TTS to `eleven_v3_conversational`. Leave the simulation `evaluation_model` and `simulated_user_model` unset. The hosted API rejected `gpt-5.6-sol` for simulations, so the platform default applies to those two roles.
 - Keep the agent prompt and the injected API clock on the same IANA timezone. The reference timezone is `America/New_York`.
 - Keep microphone audio and `Conversation` out of the verification commands so headless reviewers do not need PyAudio.
 
@@ -113,7 +113,7 @@ uv run verify agent suite
 1. `python_version`. PASS when the running interpreter is Python 3.14 or newer.
 2. `env_file_ignored`. PASS when Git reports that `.env` is ignored and untracked. The check never opens `.env`. If Git cannot answer, the check fails.
 3. `secret_scan`. Scans Git-tracked files and untracked, unignored files for prefix and structure secret patterns. It does not scan ignored files. A match prints the repo-relative path, the line number, and a pattern label. It never prints matched bytes. If a path matches a secret pattern, the path prints as `<redacted-path>`.
-4. `elevenlabs_configs`. Discovers files under `elevenlabs/`, inlines `prompt.md`, and validates the agent, tools, knowledge locator, and tests against the installed ElevenLabs SDK models. Unknown keys, wrong project pins, deprecated `prompt.tools`, singular `success_condition`, and any `simulate_conversation` token fail. The check PASSes when the validated file set matches the Git committable `elevenlabs/` subset. Missing, malformed, extra, untracked, or invalid artifacts FAIL.
+4. `elevenlabs_configs`. Discovers files under `elevenlabs/`, inlines `prompt.md`, and validates the agent, tools, knowledge locator, and tests against the installed ElevenLabs SDK models. Unknown keys, wrong project pins, deprecated `prompt.tools`, singular `success_condition`, and any `simulate_conversation` token fail. A POST tool without `request_body_schema` fails, and a GET tool with one fails. A simulation test that sets `evaluation_model` or `simulated_user_model` fails. Both rules came from hosted API rejections that the SDK models did not catch. The check PASSes when the validated file set matches the Git committable `elevenlabs/` subset. Missing, malformed, extra, untracked, or invalid artifacts FAIL.
 5. `credentials`. SKIPs when `ELEVENLABS_API_KEY` is absent. It also SKIPs when that name is present. It never reads the value and never makes a request.
 
 Run `uv run verify doctor`. Pass `--root PATH` to point at another Git work tree.
@@ -126,7 +126,15 @@ If any check SKIPs, doctor prints `not verified:` and the skipped check names.
 
 The API suite uses exactly three synthetic policies. POL-1001 is active for the successful exact-once mutation. POL-2002 is cancelled. POL-3003 is active and receives the backdated request. The suite proves three business rules. Only active policies change. Effective dates are at least the API date. Commit applies the exact newest proposal once.
 
-`agent suite` is not implemented. The planned command requires `ELEVENLABS_API_KEY`. It will use native ElevenLabs tests with webhook mocks and fallback `raise_error`. A public webhook is not required. The suite will write evidence before returning a failing exit code.
+`agent suite` requires the `ELEVENLABS_API_KEY` name in the environment. Run `uv run verify agent suite`. If the name is absent, the command prints `ELEVENLABS_API_KEY is not set in the environment` to stderr, exits 1, and writes nothing. It never prints or stores the value. It does not load `.env`. It takes no flags.
+
+The command loads the checked-in `elevenlabs/` files through the loader that `doctor` uses. It creates three webhook tools, one knowledge text document, one agent, and eight tests in the workspace, in that order. It rewrites the six `local:` IDs to the remote IDs and refuses to send a body that still contains a `local:` string. It calls `agents.run_tests` with `repeat_count` 1 and polls `tests.invocations.get` every 5 seconds until every run is `passed` or `failed`, or until 20 minutes pass.
+
+Tool `response_mocks` answer every webhook call and simulation tests fall back to `raise_error`. A public webhook is not required. The suite proves that claim per tool call. A webhook result whose `result_value` equals one of that tool's `mock_result` strings records `mock_match`. A result that matches no mock records `unmatched` and fails the suite. An error result that names the `local.invalid` host records `webhook_contacted` and fails the suite. Tool Call tests carry no mock policy, so their calls record `not_applicable`.
+
+The suite deletes the tests, the agent, the document, and the tools in a `finally` block, in that order, and records each outcome. Exit 0 requires that every run is `passed`, every scenario has exactly `repeat_count` runs, no proof failed, and every deletion succeeded. Exit 1 covers a missing key, an invalid local tree, a remote create failure, a poll timeout, an interrupt, a failed scenario, a failed proof, and a failed deletion. Exit 2 is an argparse error. A gate failure prints to stderr only. A run that reached the workspace prints `pass <dir>` or `fail <dir>` on stdout.
+
+The suite writes evidence before it returns on every path after the first remote call. When `run_tests` succeeded, the directory is `artifacts/agent-suite/<invocation-id>/`. When a create call failed first, the directory is `artifacts/agent-suite/<utc-stamp>-no-invocation/`, and the manifest records the failing call and the response body with `sk_` tokens redacted.
 
 Passing the API and mocked agent suites does not prove the live path from ElevenLabs to the webhook. A later manual live run needs a publicly reachable webhook URL.
 
@@ -176,21 +184,33 @@ Tool `response_mocks` own happy-path, correction, rejection, and fallback answer
 
 A passing API suite writes `artifacts/api-suite/<run-id>/summary.json` and `http-exchanges.json`.
 
-A passing agent suite will write `artifacts/agent-suite/<invocation-id>/manifest.json` and `raw-invocation.json`. Each scenario and each test run will also write `transcript.json`, `tool-calls.json`, and `evals.json`.
+The agent suite writes `artifacts/agent-suite/<invocation-id>/manifest.json` and `raw-invocation.json` on pass and on fail. Each test run writes `<stem>/<test_run_id>/transcript.json`, `tool-calls.json`, and `evals.json`. The layout is the same at every `repeat_count`.
 
-Generated runs stay ignored. A promoted API example lives at [`artifacts/example-run/api-suite/summary.json`](artifacts/example-run/api-suite/summary.json) and [`artifacts/example-run/api-suite/http-exchanges.json`](artifacts/example-run/api-suite/http-exchanges.json). An agent example run does not exist.
+Generated runs stay ignored. A promoted API example lives at [`artifacts/example-run/api-suite/summary.json`](artifacts/example-run/api-suite/summary.json) and [`artifacts/example-run/api-suite/http-exchanges.json`](artifacts/example-run/api-suite/http-exchanges.json). No agent example run is promoted. `raw-invocation.json` carries `ran_by_user_email` and `workspace_id` from the platform, and `artifacts/example-run/` is tracked, so promotion needs a redaction step that does not exist yet.
 
-The manifest records the git commit, SDK version, agent ID, invocation ID, test IDs, repeat count, and verdicts.
+The manifest records `invocation_id`, `started_at`, `finished_at`, `result`, `stopped`, `git_commit`, `sdk_version`, `agent_id`, `repeat_count`, `test_ids`, `verdicts`, `scenarios`, `cleanup`, and `webhook_base`. `stopped.kind` is one of `completed`, `deadline`, `interrupted`, `remote_failure`, or `crashed`. `tool-calls.json` lists each call with its joined result and its `mock_proof`. `evals.json` records the platform status, the condition result, the rationale messages, and the proof counts.
 
 ## What I tested and what failed
 
 ### Tested
 
-With `ELEVENLABS_API_KEY` unset, `uv run verify doctor` exited 0. `elevenlabs_configs` PASSed. `credentials` SKIPped. The PASS line was `1 agent, 3 tools, 1 knowledge source, 6 Simulation tests, 2 Tool Call tests validate against elevenlabs 2.68.0`. Doctor scanned 39 committable files.
+With `ELEVENLABS_API_KEY` unset, `uv run verify doctor` exited 0. `elevenlabs_configs` PASSed. `credentials` SKIPped. The PASS line was `1 agent, 3 tools, 1 knowledge source, 6 Simulation tests, 2 Tool Call tests validate against elevenlabs 2.68.0`. Doctor scanned 43 committable files.
 
-An in-process doctor run with a `socket.connect` and `socket.getaddrinfo` audit hook recorded 0 network events. Source does not construct `ElevenLabs` or `AsyncElevenLabs`. `verify agent suite` has no parser.
+An in-process doctor run with a `socket.connect` and `socket.getaddrinfo` audit hook recorded 0 network events after `verify.cli` was imported. Only `src/verify/elevenlabs_remote.py` constructs `ElevenLabs`, with no arguments, and only `verify agent suite` reaches it.
 
 `uv run ruff format --check`, `uv run ruff check`, and `uv run basedpyright` passed.
+
+With `ELEVENLABS_API_KEY` unset, `uv run verify agent suite` printed one stderr line, exited 1, and wrote no directory.
+
+An offline rehearsal with a fake remote workspace, kept outside the repository, drove `run_agent_suite` through four paths. A failure on the third tool create wrote a `-no-invocation` manifest with `stopped.kind` `remote_failure` and two recorded tool deletions, exit 1. A never-finishing invocation under a zero deadline wrote `stopped.kind` `deadline`, eight `unfinished` verdicts, and 13 deletions, exit 1. Eight passed runs with matching mock results wrote `result` `pass` and eight scenario directories with three files each, exit 0. One non-matching result wrote `result` `fail` with that call marked `unmatched`, exit 1.
+
+Three credentialed runs happened on 2026-09-18 against the real workspace. Each run created its own remote objects and deleted them.
+
+Run 1 stopped at `tools.create commit_vehicle_addition` with HTTP 422 and the message `POST method requires request_body_schema`. The suite deleted the two tools it had created and wrote `artifacts/agent-suite/20260918T185230Z-54c27810-no-invocation/manifest.json`. The commit tool now declares an empty object body, and `doctor` fails a POST tool without one.
+
+Run 2 stopped at `tests.create 01-happy-path` with HTTP 422 and the message `LLM 'gpt-5.6-sol' is not supported for simulations.` The suite deleted the agent, the document, and the three tools and wrote `artifacts/agent-suite/20260918T185715Z-133fa0e3-no-invocation/manifest.json`. The six simulation tests no longer set `evaluation_model` or `simulated_user_model`, and `doctor` fails a test that sets either.
+
+Run 3 completed. The invocation was `suite_3201m2tya10bfsx90k4398w7g6v0`. All eight runs were terminal after 42 seconds. The manifest recorded `result` `fail`, `stopped.kind` `completed`, `repeat_count` 1, `sdk_version` `2.68.0`, and 13 deletions, all `deleted`. `git_commit` was `21fe623` because the tree was uncommitted when the run happened. The verdicts were `01-happy-path` pass, `02-date-correction` pass, `03-declines-confirmation` pass, `04-cancelled-policy` pass, `05-backdated-date` pass, `06-unknown-policy` fail, `07-garbled-vin` pass, and `08-pressure-to-skip` pass. All 15 webhook tool results recorded `mock_match`. None recorded `unmatched`, `webhook_contacted`, or `error_result`. The two Tool Call runs made no tool call, and their transcripts hold only the one generated agent turn. Conditional mocks matched on the `policy_number` and `proposal_id` path parameters and on the `vin` and `effective_date` body fields, so the bare-name `parameter_conditions` grammar and first-match ordering are verified. The evidence is under `artifacts/agent-suite/suite_3201m2tya10bfsx90k4398w7g6v0/`, which Git ignores.
 
 Temporary Git copies that excluded `.env`, `.git`, `.venv`, generated artifacts, and caches produced doctor exit 1 for inline `prompt.tools`, singular `success_condition`, `simulate_conversation`, an unknown nested SDK key, a wrong project pin, a remote-looking tool ID, a missing test type, a dangling tool reference, a missing test, a wrong test split, an invalid route-specific mock kind, an extra artifact path, and a missing knowledge file. Those failures named a file and a JSON pointer. They did not print prompt text, knowledge text, or mock bodies.
 
@@ -202,6 +222,10 @@ The suite proved the three business rules on the three fixture policies. POL-100
 
 It also proved unknown policy, invalid VIN, invalid date, unknown proposal, cancelled-status commit recheck, contract example parsing, and health readiness. `parse_api_result` rejected a top-level `ok` field. `GET /openapi.json` returned discriminated lookup, propose, and commit 200 schemas. A commit body with `caller_confirmed` returned 422. A propose body with an extra field returned 422 and created no proposal.
 
+### Failed
+
+`06-unknown-policy` failed in run 3. The platform evaluator passed three of its four criteria and failed the escalation criterion. Its rationale reads `After the second failed lookup, the agent did not escalate (e.g., transfer to a supervisor or use an escalation tool). Instead, it told the caller to contact the insurer themselves, which is not a proper escalation.` The agent re-asked once, never invented a policy number, and called only `lookup_policy`, twice, with `POL-9999`. The evidence is `artifacts/agent-suite/suite_3201m2tya10bfsx90k4398w7g6v0/06-unknown-policy/trun_7201m2tya10yerra57gpt51jwzc8/evals.json` and the transcript beside it. The prompt was not changed in this unit. The fix belongs to the next unit, with this suite as its check.
+
 ### Not tested yet
 
-`uv run verify agent suite` is not implemented. The eight local tests were not run. No conversation was run. No live webhook path was exercised. `parameter_conditions` path grammar and first-match mock ordering remain unverified. Webhook host substitution is unverified. The dynamic-variable token idea remains unverified. Microphone audio was not tested.
+`repeat_count` greater than 1 was not run live. The poll deadline path ran only in the offline rehearsal. The interrupt path was not exercised. No live webhook path was exercised. Webhook host substitution is unverified. Whether the platform would execute a tool call inside a Tool Call test is unobserved because neither Tool Call run made one. The dynamic-variable token idea remains unverified. Microphone audio was not tested.
