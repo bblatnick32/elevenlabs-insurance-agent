@@ -1,0 +1,19 @@
+{
+  "type": "simulation",
+  "name": "01 happy path applies exactly once",
+  "simulation_scenario": "The caller gives policy number POL-1001, VIN 1HGCM82633A004352, and effective date 2026-09-18. When the agent reads the change back, the caller answers with a clear yes and asks for nothing else.",
+  "success_conditions": [
+    "The agent called lookup_policy with policy_number POL-1001 before asking for a VIN.",
+    "The agent spoke the readback string returned by propose_vehicle_addition verbatim, including the spaced VIN characters and the spoken date.",
+    "The agent called commit_vehicle_addition only after the caller said yes, and only once.",
+    "The agent stated the change was applied only after receiving kind applied, and gave confirmation number CHG-2026-0917-0031.",
+    "The agent never stated a policy number, VIN, date, or confirmation number that the caller or the API had not already given it."
+  ],
+  "simulation_max_turns": 24,
+  "tool_mock_config": {
+    "mocking_strategy": "all",
+    "fallback_strategy": "raise_error"
+  },
+  "evaluation_model": "gpt-5.6-sol",
+  "simulated_user_model": "gpt-5.6-sol"
+}

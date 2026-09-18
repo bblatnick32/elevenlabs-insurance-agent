@@ -4,8 +4,16 @@ import sys
 from collections.abc import Callable
 from dataclasses import dataclass
 from enum import StrEnum
+from importlib.metadata import version
 from pathlib import Path
 from typing import Literal
+
+from verify.elevenlabs_local import (
+    ARTIFACT_ROOT,
+    ArtifactFailures,
+    LocalAgent,
+    load_local_agent,
+)
 
 type CheckName = Literal[
     "python_version",
@@ -71,14 +79,6 @@ _LS_CACHED = ("git", "ls-files", "-z", "--cached")
 _LS_OTHERS = ("git", "ls-files", "-z", "--others", "--exclude-standard")
 _CHECK_IGNORE_ENV = ("git", "check-ignore", "-q", "--", ".env")
 _GIT_UNAVAILABLE = "git metadata is unavailable"
-_CONFIG_ROOTS = frozenset({"agents.json", "tools.json", "tests.json"})
-_CONFIG_PREFIXES = (
-    "agent_configs/",
-    "tool_configs/",
-    "test_configs/",
-    "agent/",
-    "elevenlabs/",
-)
 _SECRET_PATTERNS: tuple[tuple[SecretPattern, re.Pattern[bytes]], ...] = (
     (SecretPattern.ELEVENLABS_SK, re.compile(rb"(?<![A-Za-z0-9_])sk_[A-Za-z0-9]+")),
     (
@@ -228,27 +228,37 @@ def _secret_scan(tree: Tree) -> Finding:
     )
 
 
-def _is_elevenlabs_config(relative: str) -> bool:
-    path = relative.replace("\\", "/")
-    if path in _CONFIG_ROOTS:
-        return True
-    return path.endswith(".json") and path.startswith(_CONFIG_PREFIXES)
+def _elevenlabs_paths(paths: frozenset[str]) -> frozenset[str]:
+    prefix = f"{ARTIFACT_ROOT}/"
+    return frozenset(
+        path.replace("\\", "/")
+        for path in paths
+        if path.replace("\\", "/").startswith(prefix)
+    )
 
 
 def _elevenlabs_configs(tree: Tree) -> Finding:
     git = tree.git
     if git is None:
         return Finding(Status.FAIL, _GIT_UNAVAILABLE)
-    count = sum(1 for path in git.tracked if _is_elevenlabs_config(path))
-    if count == 0:
-        return Finding(
-            Status.SKIP,
-            "no checked-in ElevenLabs configs and no SDK dependency; nothing to validate",
-        )
-    return Finding(
-        Status.SKIP,
-        f"{count} ElevenLabs config files exist; validation is not implemented",
-    )
+    committable = _elevenlabs_paths(git.committable)
+    outcome = load_local_agent(tree.root)
+    match outcome:
+        case ArtifactFailures(failures=failures):
+            head = failures[0]
+            more = f" (+{len(failures) - 1} more)" if len(failures) > 1 else ""
+            return Finding(Status.FAIL, f"{head.path}: {head.detail}{more}")
+        case LocalAgent() as agent:
+            if agent.files != committable:
+                names = " ".join(sorted(agent.files ^ committable))
+                return Finding(
+                    Status.FAIL,
+                    f"{ARTIFACT_ROOT}/ tree and Git committable set disagree on {names}",
+                )
+            return Finding(
+                Status.PASS,
+                f"{agent.summary} validate against elevenlabs {version('elevenlabs')}",
+            )
 
 
 def _credentials(tree: Tree) -> Finding:

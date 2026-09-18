@@ -1,0 +1,30 @@
+{
+  "name": "policy-servicing-vehicle-addition",
+  "conversation_config": {
+    "agent": {
+      "first_message": "Thanks for calling policy servicing. What is your policy number?",
+      "language": "en",
+      "prompt": {
+        "llm": "gpt-5.6-sol",
+        "temperature": 0,
+        "timezone": "America/New_York",
+        "tool_ids": [
+          "local:lookup_policy",
+          "local:propose_vehicle_addition",
+          "local:commit_vehicle_addition"
+        ],
+        "knowledge_base": [
+          {
+            "type": "text",
+            "name": "policy-servicing-rules",
+            "id": "local:policy-servicing-rules",
+            "usage_mode": "prompt"
+          }
+        ]
+      }
+    },
+    "tts": {
+      "model_id": "eleven_v3_conversational"
+    }
+  }
+}

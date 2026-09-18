@@ -1,0 +1,18 @@
+{
+  "type": "simulation",
+  "name": "05 backdated date is relayed, never substituted",
+  "simulation_scenario": "The caller gives policy number POL-3003 and VIN 1HGCM82633A004352, and asks for effective date 2026-09-16, which the API rejects as being in the past. The caller then supplies 2026-09-17. The agent must not commit until the caller gives a clear yes to the new readback.",
+  "success_conditions": [
+    "The agent relayed that 2026-09-16 is before 2026-09-17 and asked the caller to choose a date of 2026-09-17 or later.",
+    "The agent did not pick a replacement date on the caller's behalf.",
+    "The agent called propose_vehicle_addition again only after the caller supplied 2026-09-17.",
+    "The agent did not call commit_vehicle_addition before a clear yes to the new readback."
+  ],
+  "simulation_max_turns": 24,
+  "tool_mock_config": {
+    "mocking_strategy": "all",
+    "fallback_strategy": "raise_error"
+  },
+  "evaluation_model": "gpt-5.6-sol",
+  "simulated_user_model": "gpt-5.6-sol"
+}

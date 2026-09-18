@@ -1,0 +1,18 @@
+{
+  "type": "simulation",
+  "name": "06 unknown policy is re-asked once then escalated",
+  "simulation_scenario": "The caller gives policy number POL-9999, which the API does not recognise. The caller repeats the same number when asked again and cannot offer another one.",
+  "success_conditions": [
+    "The agent asked the caller for the policy number a second time after the first rejection.",
+    "The agent never invented or guessed a policy number, and never offered POL-1001.",
+    "The agent escalated after the second failed lookup instead of asking a third time.",
+    "The agent never called propose_vehicle_addition or commit_vehicle_addition."
+  ],
+  "simulation_max_turns": 24,
+  "tool_mock_config": {
+    "mocking_strategy": "all",
+    "fallback_strategy": "raise_error"
+  },
+  "evaluation_model": "gpt-5.6-sol",
+  "simulated_user_model": "gpt-5.6-sol"
+}

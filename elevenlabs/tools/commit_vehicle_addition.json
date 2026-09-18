@@ -1,0 +1,76 @@
+{
+  "tool_config": {
+    "type": "webhook",
+    "name": "commit_vehicle_addition",
+    "description": "Apply the latest proposal. Takes only proposal_id. Call only after a verbatim readback and a clear unqualified yes. Returns kind applied or kind rejected.",
+    "tool_error_handling_mode": "passthrough",
+    "api_schema": {
+      "url": "https://local.invalid/v1/vehicle-addition-proposals/{proposal_id}/commit",
+      "method": "POST",
+      "path_params_schema": {
+        "proposal_id": {
+          "type": "string",
+          "description": "proposal_id from the most recent confirmation_ready result."
+        }
+      }
+    }
+  },
+  "response_mocks": [
+    {
+      "mock_result": "{\"kind\":\"applied\",\"proposal_id\":\"vap_01K5EPJ7R9QY6M8B4T2D3F1H0C\",\"confirmation_number\":\"CHG-2026-0917-0031\",\"change\":{\"type\":\"vehicle_addition\",\"policy_number\":\"POL-1001\",\"vin\":\"1HGCM82633A004352\",\"effective_date\":\"2026-09-18\"},\"applied_at\":\"2026-09-17T20:45:12Z\"}",
+      "is_error": false,
+      "parameter_conditions": [
+        {
+          "path": "proposal_id",
+          "eval": {
+            "type": "exact",
+            "expected_value": "vap_01K5EPJ7R9QY6M8B4T2D3F1H0C"
+          }
+        }
+      ]
+    },
+    {
+      "mock_result": "{\"kind\":\"applied\",\"proposal_id\":\"vap_01K5EPJ7R9QY6M8B4T2D3F1H3F\",\"confirmation_number\":\"CHG-2026-0917-0032\",\"change\":{\"type\":\"vehicle_addition\",\"policy_number\":\"POL-1001\",\"vin\":\"1HGCM82633A004352\",\"effective_date\":\"2026-09-21\"},\"applied_at\":\"2026-09-17T20:45:12Z\"}",
+      "is_error": false,
+      "parameter_conditions": [
+        {
+          "path": "proposal_id",
+          "eval": {
+            "type": "exact",
+            "expected_value": "vap_01K5EPJ7R9QY6M8B4T2D3F1H3F"
+          }
+        }
+      ]
+    },
+    {
+      "mock_result": "{\"kind\":\"applied\",\"proposal_id\":\"vap_01K5EPJ7R9QY6M8B4T2D3F1H0D\",\"confirmation_number\":\"CHG-2026-0917-0033\",\"change\":{\"type\":\"vehicle_addition\",\"policy_number\":\"POL-3003\",\"vin\":\"1HGCM82633A004352\",\"effective_date\":\"2026-09-17\"},\"applied_at\":\"2026-09-17T20:45:12Z\"}",
+      "is_error": false,
+      "parameter_conditions": [
+        {
+          "path": "proposal_id",
+          "eval": {
+            "type": "exact",
+            "expected_value": "vap_01K5EPJ7R9QY6M8B4T2D3F1H0D"
+          }
+        }
+      ]
+    },
+    {
+      "mock_result": "{\"kind\":\"rejected\",\"code\":\"proposal_superseded\",\"recovery\":\"escalate\",\"message\":\"Proposal vap_01K5EPJ7R9QY6M8B4T2D3F1H2E was superseded. No change was applied.\"}",
+      "is_error": false,
+      "parameter_conditions": [
+        {
+          "path": "proposal_id",
+          "eval": {
+            "type": "exact",
+            "expected_value": "vap_01K5EPJ7R9QY6M8B4T2D3F1H2E"
+          }
+        }
+      ]
+    },
+    {
+      "mock_result": "{\"kind\":\"rejected\",\"code\":\"proposal_not_found\",\"recovery\":\"escalate\",\"message\":\"Proposal was not found. No change was applied.\"}",
+      "is_error": false
+    }
+  ]
+}

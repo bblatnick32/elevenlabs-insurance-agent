@@ -1,0 +1,91 @@
+{
+  "type": "tool",
+  "name": "03 caller withholds confirmation so commit never fires",
+  "chat_history": [
+    {
+      "role": "agent",
+      "time_in_call_secs": 0,
+      "message": "Thanks for calling policy servicing. What is your policy number?"
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 4,
+      "message": "POL-1001."
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 8,
+      "message": "Let me pull that up.",
+      "tool_calls": [
+        {
+          "type": "webhook",
+          "request_id": "req_lookup_policy",
+          "tool_name": "lookup_policy",
+          "params_as_json": "{\"policy_number\":\"POL-1001\"}",
+          "tool_has_been_called": true
+        }
+      ],
+      "tool_results": [
+        {
+          "type": "webhook",
+          "request_id": "req_lookup_policy",
+          "tool_name": "lookup_policy",
+          "result_value": "{\"kind\":\"policy_found\",\"policy_number\":\"POL-1001\",\"vehicles\":[],\"earliest_effective_date\":\"2026-09-17\"}",
+          "is_error": false,
+          "tool_has_been_called": true
+        }
+      ]
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 12,
+      "message": "I have your policy. What is the 17-character VIN and the effective date?"
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 20,
+      "message": "1HGCM82633A004352, effective September 18."
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 26,
+      "message": "One moment.",
+      "tool_calls": [
+        {
+          "type": "webhook",
+          "request_id": "req_propose_vehicle_addition",
+          "tool_name": "propose_vehicle_addition",
+          "params_as_json": "{\"policy_number\":\"POL-1001\",\"vin\":\"1HGCM82633A004352\",\"effective_date\":\"2026-09-18\"}",
+          "tool_has_been_called": true
+        }
+      ],
+      "tool_results": [
+        {
+          "type": "webhook",
+          "request_id": "req_propose_vehicle_addition",
+          "tool_name": "propose_vehicle_addition",
+          "result_value": "{\"kind\":\"confirmation_ready\",\"proposal_id\":\"vap_01K5EPJ7R9QY6M8B4T2D3F1H0C\",\"change\":{\"type\":\"vehicle_addition\",\"policy_number\":\"POL-1001\",\"vin\":\"1HGCM82633A004352\",\"effective_date\":\"2026-09-18\"},\"readback\":\"I will add the vehicle with V I N 1 H G C M 8 2 6 3 3 A 0 0 4 3 5 2 to policy P O L dash 1 0 0 1, effective September 18, 2026. Do you confirm this exact change?\"}",
+          "is_error": false,
+          "tool_has_been_called": true
+        }
+      ]
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 32,
+      "message": "I will add the vehicle with V I N 1 H G C M 8 2 6 3 3 A 0 0 4 3 5 2 to policy P O L dash 1 0 0 1, effective September 18, 2026. Do you confirm this exact change?"
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 38,
+      "message": "Hold on, I am not sure. Let me check with my husband first."
+    }
+  ],
+  "tool_call_parameters": {
+    "referenced_tool": {
+      "id": "local:commit_vehicle_addition",
+      "type": "webhook"
+    },
+    "verify_absence": true
+  }
+}
