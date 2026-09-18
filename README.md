@@ -108,9 +108,19 @@ uv run verify api suite
 uv run verify agent suite
 ```
 
-`doctor` is not implemented yet. The planned check runs offline checks first and exits 0 when they pass. Credential-dependent checks print SKIP when no key is present. A future `--strict` mode promotes SKIP to failure for CI.
+`doctor` runs five offline checks in this order.
 
-Doctor validates JSON and checked-in ElevenLabs configs against the installed SDK models. It rejects deprecated fields and methods and confirms model enum membership. The check requires that `.env` is ignored and that tracked files contain no secret patterns. When credentials exist, doctor reports remote agent and tool status. Doctor never prints secret values.
+1. `python_version`. PASS when the running interpreter is Python 3.14 or newer.
+2. `env_file_ignored`. PASS when Git reports that `.env` is ignored and untracked. The check never opens `.env`. If Git cannot answer, the check fails.
+3. `secret_scan`. Scans Git-tracked files and untracked, unignored files for prefix and structure secret patterns. It does not scan ignored files. A match prints the repo-relative path, the line number, and a pattern label. It never prints matched bytes. If a path matches a secret pattern, the path prints as `<redacted-path>`.
+4. `elevenlabs_configs`. Looks at Git-tracked paths for known config locations. With no checked-in configs, it SKIPs with `no checked-in ElevenLabs configs and no SDK dependency; nothing to validate`. If those files exist, it SKIPs and reports how many files exist because validation is not implemented.
+5. `credentials`. SKIPs when `ELEVENLABS_API_KEY` is absent. It also SKIPs when that name is present. It never reads the value and never makes a request.
+
+Run `uv run verify doctor`. Pass `--root PATH` to point at another Git work tree.
+
+Doctor does not load `.env`. Git must be available. Exit 0 means the offline checks did not fail. It does not prove SDK model validity, remote agent state, or the live webhook path. Exit 1 means at least one check failed. Exit 2 is an argparse error.
+
+If any check SKIPs, doctor prints `not verified:` and the skipped check names.
 
 `api suite` requires no ElevenLabs credentials. Run `uv run verify api suite`. The command starts Uvicorn on an ephemeral `127.0.0.1` port and calls it with HTTPX over a real TCP socket. Do not use FastAPI TestClient, ASGITransport, or direct domain calls as the finish evidence. The suite uses the fixed instant `2026-09-17T20:45:12Z` and timezone `America/New_York`. It writes evidence to `artifacts/api-suite/<run-id>/summary.json` and `http-exchanges.json` before it returns a failing exit code. After every check passes, `uv run verify api suite --promote` copies that run to `artifacts/example-run/api-suite/`.
 
@@ -147,9 +157,11 @@ The manifest records the git commit, SDK version, agent ID, invocation ID, test 
 
 ### Tested
 
+With `ELEVENLABS_API_KEY` unset, `uv run verify doctor` exited 0.
+
 `uv run verify api suite` and `uv run verify api suite --promote` both exited 0.
 
-The promoted run is [`artifacts/example-run/api-suite/summary.json`](artifacts/example-run/api-suite/summary.json) and [`artifacts/example-run/api-suite/http-exchanges.json`](artifacts/example-run/api-suite/http-exchanges.json). That run recorded result `pass`. It recorded 36 case verdicts, all `pass`, and 25 HTTP exchanges. The clock was `2026-09-17T20:45:12Z` in `America/New_York`. The ephemeral port was `56444`. `git_commit` is null because this repository has no commits yet.
+The promoted run is [`artifacts/example-run/api-suite/summary.json`](artifacts/example-run/api-suite/summary.json) and [`artifacts/example-run/api-suite/http-exchanges.json`](artifacts/example-run/api-suite/http-exchanges.json). That run recorded result `pass`. It recorded 36 case verdicts, all `pass`, and 25 HTTP exchanges. The clock was `2026-09-17T20:45:12Z` in `America/New_York`. The ephemeral port was `56444`. `git_commit` is null. The promoted API artifact predates the current commit.
 
 The suite proved the three business rules on the three fixture policies. POL-1001 proposed, corrected, rejected the superseded commit, applied the newest proposal once, and replayed the same `applied` result with one vehicle total. POL-2002 rejected lookup and proposal with no mutation. POL-3003 rejected `2026-09-16`, accepted `2026-09-17`, then rejected commit after the clock advanced one calendar day, with no mutation.
 
@@ -157,4 +169,4 @@ It also proved unknown policy, invalid VIN, invalid date, unknown proposal, canc
 
 ### Not tested yet
 
-`uv run verify doctor` and `uv run verify agent suite` are not implemented. No agent artifact exists. No live webhook path was exercised. The dynamic-variable token idea remains unverified. Microphone audio was not tested.
+`uv run verify agent suite` is not implemented. No agent artifact exists. No live webhook path was exercised. The dynamic-variable token idea remains unverified. Microphone audio was not tested.

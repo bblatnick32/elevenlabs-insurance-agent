@@ -25,6 +25,7 @@ jobs:
       - run: uv run ruff format --check
       - run: uv run ruff check --output-format=github
       - run: uv run basedpyright
+      - run: uv run verify doctor
       - run: uv run verify api suite
       # The suite writes evidence before it exits non-zero, so keep it on failure too.
       - if: ${{ !cancelled() }}
