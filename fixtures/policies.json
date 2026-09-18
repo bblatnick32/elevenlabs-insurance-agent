@@ -1,0 +1,19 @@
+{
+  "policies": [
+    {
+      "policy_number": "POL-1001",
+      "status": "active",
+      "vehicles": []
+    },
+    {
+      "policy_number": "POL-2002",
+      "status": "cancelled",
+      "vehicles": []
+    },
+    {
+      "policy_number": "POL-3003",
+      "status": "active",
+      "vehicles": []
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "kind": "applied",
+  "proposal_id": "vap_01K5EPJ7R9QY6M8B4T2D3F1H0C",
+  "confirmation_number": "CHG-2026-0917-0031",
+  "change": {
+    "type": "vehicle_addition",
+    "policy_number": "POL-1001",
+    "vin": "1HGCM82633A004352",
+    "effective_date": "2026-09-18"
+  },
+  "applied_at": "2026-09-17T20:45:12Z"
+}

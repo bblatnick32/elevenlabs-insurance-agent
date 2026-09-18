@@ -1,0 +1,867 @@
+[
+  {
+    "method": "GET",
+    "path": "/healthz",
+    "status": 200,
+    "response": {
+      "status": "ok"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/openapi.json",
+    "status": 200,
+    "response": {
+      "openapi": "3.1.0",
+      "info": {
+        "title": "FastAPI",
+        "version": "0.1.0"
+      },
+      "paths": {
+        "/healthz": {
+          "get": {
+            "summary": "Healthz",
+            "operationId": "healthz_healthz_get",
+            "responses": {
+              "200": {
+                "description": "Successful Response",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "additionalProperties": {
+                        "type": "string"
+                      },
+                      "type": "object",
+                      "title": "Response Healthz Healthz Get"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/v1/policies/{policy_number}": {
+          "get": {
+            "summary": "Get Policy",
+            "operationId": "get_policy_v1_policies__policy_number__get",
+            "parameters": [
+              {
+                "name": "policy_number",
+                "in": "path",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "title": "Policy Number"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Successful Response",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "oneOf": [
+                        {
+                          "$ref": "#/components/schemas/PolicyFoundResult"
+                        },
+                        {
+                          "$ref": "#/components/schemas/RejectedResult"
+                        }
+                      ],
+                      "discriminator": {
+                        "propertyName": "kind",
+                        "mapping": {
+                          "policy_found": "#/components/schemas/PolicyFoundResult",
+                          "rejected": "#/components/schemas/RejectedResult"
+                        }
+                      },
+                      "title": "Response Get Policy V1 Policies  Policy Number  Get"
+                    }
+                  }
+                }
+              },
+              "422": {
+                "description": "Validation Error",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/HTTPValidationError"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/v1/policies/{policy_number}/vehicle-addition-proposals": {
+          "post": {
+            "summary": "Propose Vehicle Addition",
+            "operationId": "propose_vehicle_addition_v1_policies__policy_number__vehicle_addition_proposals_post",
+            "parameters": [
+              {
+                "name": "policy_number",
+                "in": "path",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "title": "Policy Number"
+                }
+              }
+            ],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ProposeRequest"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "Successful Response",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "oneOf": [
+                        {
+                          "$ref": "#/components/schemas/ConfirmationReadyResult"
+                        },
+                        {
+                          "$ref": "#/components/schemas/RejectedResult"
+                        }
+                      ],
+                      "discriminator": {
+                        "propertyName": "kind",
+                        "mapping": {
+                          "confirmation_ready": "#/components/schemas/ConfirmationReadyResult",
+                          "rejected": "#/components/schemas/RejectedResult"
+                        }
+                      },
+                      "title": "Response Propose Vehicle Addition V1 Policies  Policy Number  Vehicle Addition Proposals Post"
+                    }
+                  }
+                }
+              },
+              "422": {
+                "description": "Validation Error",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/HTTPValidationError"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/v1/vehicle-addition-proposals/{proposal_id}/commit": {
+          "post": {
+            "summary": "Commit Proposal",
+            "operationId": "commit_proposal_v1_vehicle_addition_proposals__proposal_id__commit_post",
+            "parameters": [
+              {
+                "name": "proposal_id",
+                "in": "path",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "title": "Proposal Id"
+                }
+              }
+            ],
+            "requestBody": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CommitRequest"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Body"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "Successful Response",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "oneOf": [
+                        {
+                          "$ref": "#/components/schemas/AppliedResult"
+                        },
+                        {
+                          "$ref": "#/components/schemas/RejectedResult"
+                        }
+                      ],
+                      "discriminator": {
+                        "propertyName": "kind",
+                        "mapping": {
+                          "applied": "#/components/schemas/AppliedResult",
+                          "rejected": "#/components/schemas/RejectedResult"
+                        }
+                      },
+                      "title": "Response Commit Proposal V1 Vehicle Addition Proposals  Proposal Id  Commit Post"
+                    }
+                  }
+                }
+              },
+              "422": {
+                "description": "Validation Error",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/HTTPValidationError"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "components": {
+        "schemas": {
+          "AppliedResult": {
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "applied",
+                "title": "Kind"
+              },
+              "proposal_id": {
+                "type": "string",
+                "title": "Proposal Id"
+              },
+              "confirmation_number": {
+                "type": "string",
+                "title": "Confirmation Number"
+              },
+              "change": {
+                "$ref": "#/components/schemas/ChangeModel"
+              },
+              "applied_at": {
+                "type": "string",
+                "title": "Applied At"
+              }
+            },
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "kind",
+              "proposal_id",
+              "confirmation_number",
+              "change",
+              "applied_at"
+            ],
+            "title": "AppliedResult"
+          },
+          "ChangeModel": {
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "vehicle_addition",
+                "title": "Type"
+              },
+              "policy_number": {
+                "type": "string",
+                "title": "Policy Number"
+              },
+              "vin": {
+                "type": "string",
+                "title": "Vin"
+              },
+              "effective_date": {
+                "type": "string",
+                "format": "date",
+                "title": "Effective Date"
+              }
+            },
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "type",
+              "policy_number",
+              "vin",
+              "effective_date"
+            ],
+            "title": "ChangeModel"
+          },
+          "CommitRequest": {
+            "properties": {},
+            "additionalProperties": false,
+            "type": "object",
+            "title": "CommitRequest"
+          },
+          "ConfirmationReadyResult": {
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "confirmation_ready",
+                "title": "Kind"
+              },
+              "proposal_id": {
+                "type": "string",
+                "title": "Proposal Id"
+              },
+              "change": {
+                "$ref": "#/components/schemas/ChangeModel"
+              },
+              "readback": {
+                "type": "string",
+                "title": "Readback"
+              }
+            },
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "kind",
+              "proposal_id",
+              "change",
+              "readback"
+            ],
+            "title": "ConfirmationReadyResult"
+          },
+          "HTTPValidationError": {
+            "properties": {
+              "detail": {
+                "items": {
+                  "$ref": "#/components/schemas/ValidationError"
+                },
+                "type": "array",
+                "title": "Detail"
+              }
+            },
+            "type": "object",
+            "title": "HTTPValidationError"
+          },
+          "PolicyFoundResult": {
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "policy_found",
+                "title": "Kind"
+              },
+              "policy_number": {
+                "type": "string",
+                "title": "Policy Number"
+              },
+              "vehicles": {
+                "items": {
+                  "$ref": "#/components/schemas/VehicleModel"
+                },
+                "type": "array",
+                "title": "Vehicles"
+              },
+              "earliest_effective_date": {
+                "type": "string",
+                "format": "date",
+                "title": "Earliest Effective Date"
+              }
+            },
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "kind",
+              "policy_number",
+              "vehicles",
+              "earliest_effective_date"
+            ],
+            "title": "PolicyFoundResult"
+          },
+          "ProposeRequest": {
+            "properties": {
+              "vin": {
+                "type": "string",
+                "title": "Vin"
+              },
+              "effective_date": {
+                "type": "string",
+                "title": "Effective Date"
+              }
+            },
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "vin",
+              "effective_date"
+            ],
+            "title": "ProposeRequest"
+          },
+          "Recovery": {
+            "type": "string",
+            "enum": [
+              "ask_caller_again",
+              "escalate"
+            ],
+            "title": "Recovery"
+          },
+          "RejectedResult": {
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "rejected",
+                "title": "Kind"
+              },
+              "code": {
+                "$ref": "#/components/schemas/RejectionCode"
+              },
+              "recovery": {
+                "$ref": "#/components/schemas/Recovery"
+              },
+              "message": {
+                "type": "string",
+                "title": "Message"
+              }
+            },
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "kind",
+              "code",
+              "recovery",
+              "message"
+            ],
+            "title": "RejectedResult"
+          },
+          "RejectionCode": {
+            "type": "string",
+            "enum": [
+              "policy_not_found",
+              "policy_cancelled",
+              "invalid_vin",
+              "invalid_effective_date",
+              "effective_date_in_past",
+              "proposal_not_found",
+              "proposal_superseded",
+              "vehicle_already_on_policy"
+            ],
+            "title": "RejectionCode"
+          },
+          "ValidationError": {
+            "properties": {
+              "loc": {
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "integer"
+                    }
+                  ]
+                },
+                "type": "array",
+                "title": "Location"
+              },
+              "msg": {
+                "type": "string",
+                "title": "Message"
+              },
+              "type": {
+                "type": "string",
+                "title": "Error Type"
+              },
+              "input": {
+                "title": "Input"
+              },
+              "ctx": {
+                "type": "object",
+                "title": "Context"
+              }
+            },
+            "type": "object",
+            "required": [
+              "loc",
+              "msg",
+              "type"
+            ],
+            "title": "ValidationError"
+          },
+          "VehicleModel": {
+            "properties": {
+              "vin": {
+                "type": "string",
+                "title": "Vin"
+              },
+              "effective_date": {
+                "type": "string",
+                "format": "date",
+                "title": "Effective Date"
+              }
+            },
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "vin",
+              "effective_date"
+            ],
+            "title": "VehicleModel"
+          }
+        }
+      }
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/policies/POL-9999",
+    "status": 200,
+    "response": {
+      "kind": "rejected",
+      "code": "policy_not_found",
+      "recovery": "ask_caller_again",
+      "message": "Policy POL-9999 was not found. Ask the caller for the policy number again."
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/policies/POL-9999/vehicle-addition-proposals",
+    "status": 200,
+    "response": {
+      "kind": "rejected",
+      "code": "policy_not_found",
+      "recovery": "ask_caller_again",
+      "message": "Policy POL-9999 was not found. Ask the caller for the policy number again."
+    },
+    "request": {
+      "vin": "1HGCM82633A004352",
+      "effective_date": "2026-09-18"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/policies/POL-1001/vehicle-addition-proposals",
+    "status": 200,
+    "response": {
+      "kind": "rejected",
+      "code": "invalid_vin",
+      "recovery": "ask_caller_again",
+      "message": "The VIN is not a valid 17-character VIN. Ask the caller for the VIN again."
+    },
+    "request": {
+      "vin": "1HGCM 82633A004352",
+      "effective_date": "2026-09-18"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/policies/POL-1001/vehicle-addition-proposals",
+    "status": 200,
+    "response": {
+      "kind": "rejected",
+      "code": "invalid_effective_date",
+      "recovery": "ask_caller_again",
+      "message": "The effective date is not a valid YYYY-MM-DD date. Ask the caller for the date again."
+    },
+    "request": {
+      "vin": "1HGCM82633A004352",
+      "effective_date": "2026/09/17"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/vehicle-addition-proposals/vap_unknown/commit",
+    "status": 200,
+    "response": {
+      "kind": "rejected",
+      "code": "proposal_not_found",
+      "recovery": "escalate",
+      "message": "Proposal vap_unknown was not found. No change was applied."
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/policies/POL-1001",
+    "status": 200,
+    "response": {
+      "kind": "policy_found",
+      "policy_number": "POL-1001",
+      "vehicles": [],
+      "earliest_effective_date": "2026-09-17"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/policies/POL-1001/vehicle-addition-proposals",
+    "status": 422,
+    "response": {
+      "detail": [
+        {
+          "type": "extra_forbidden",
+          "loc": [
+            "body",
+            "ok"
+          ],
+          "msg": "Extra inputs are not permitted",
+          "input": true
+        }
+      ]
+    },
+    "request": {
+      "vin": "1HGCM82633A004352",
+      "effective_date": "2026-09-19",
+      "ok": true
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/policies/POL-1001/vehicle-addition-proposals",
+    "status": 200,
+    "response": {
+      "kind": "confirmation_ready",
+      "proposal_id": "vap_01K5EPJ7R9QY6M8B4T2D3F1H0B",
+      "change": {
+        "type": "vehicle_addition",
+        "policy_number": "POL-1001",
+        "vin": "1HGCM82633A004352",
+        "effective_date": "2026-09-19"
+      },
+      "readback": "I will add the vehicle with V I N 1 H G C M 8 2 6 3 3 A 0 0 4 3 5 2 to policy P O L dash 1 0 0 1, effective September 19, 2026. Do you confirm this exact change?"
+    },
+    "request": {
+      "vin": "1HGCM82633A004352",
+      "effective_date": "2026-09-19"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/policies/POL-1001/vehicle-addition-proposals",
+    "status": 200,
+    "response": {
+      "kind": "confirmation_ready",
+      "proposal_id": "vap_01K5EPJ7R9QY6M8B4T2D3F1H0C",
+      "change": {
+        "type": "vehicle_addition",
+        "policy_number": "POL-1001",
+        "vin": "1HGCM82633A004352",
+        "effective_date": "2026-09-18"
+      },
+      "readback": "I will add the vehicle with V I N 1 H G C M 8 2 6 3 3 A 0 0 4 3 5 2 to policy P O L dash 1 0 0 1, effective September 18, 2026. Do you confirm this exact change?"
+    },
+    "request": {
+      "vin": "1hgcm82633a004352",
+      "effective_date": "2026-09-18"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/vehicle-addition-proposals/vap_01K5EPJ7R9QY6M8B4T2D3F1H0C/commit",
+    "status": 422,
+    "response": {
+      "detail": [
+        {
+          "type": "extra_forbidden",
+          "loc": [
+            "body",
+            "caller_confirmed"
+          ],
+          "msg": "Extra inputs are not permitted",
+          "input": true
+        }
+      ]
+    },
+    "request": {
+      "caller_confirmed": true
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/vehicle-addition-proposals/vap_01K5EPJ7R9QY6M8B4T2D3F1H0B/commit",
+    "status": 200,
+    "response": {
+      "kind": "rejected",
+      "code": "proposal_superseded",
+      "recovery": "escalate",
+      "message": "Proposal vap_01K5EPJ7R9QY6M8B4T2D3F1H0B was superseded. No change was applied."
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/vehicle-addition-proposals/vap_01K5EPJ7R9QY6M8B4T2D3F1H0C/commit",
+    "status": 200,
+    "response": {
+      "kind": "applied",
+      "proposal_id": "vap_01K5EPJ7R9QY6M8B4T2D3F1H0C",
+      "confirmation_number": "CHG-2026-0917-0031",
+      "change": {
+        "type": "vehicle_addition",
+        "policy_number": "POL-1001",
+        "vin": "1HGCM82633A004352",
+        "effective_date": "2026-09-18"
+      },
+      "applied_at": "2026-09-17T20:45:12Z"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/vehicle-addition-proposals/vap_01K5EPJ7R9QY6M8B4T2D3F1H0C/commit",
+    "status": 200,
+    "response": {
+      "kind": "applied",
+      "proposal_id": "vap_01K5EPJ7R9QY6M8B4T2D3F1H0C",
+      "confirmation_number": "CHG-2026-0917-0031",
+      "change": {
+        "type": "vehicle_addition",
+        "policy_number": "POL-1001",
+        "vin": "1HGCM82633A004352",
+        "effective_date": "2026-09-18"
+      },
+      "applied_at": "2026-09-17T20:45:12Z"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/policies/POL-1001",
+    "status": 200,
+    "response": {
+      "kind": "policy_found",
+      "policy_number": "POL-1001",
+      "vehicles": [
+        {
+          "vin": "1HGCM82633A004352",
+          "effective_date": "2026-09-18"
+        }
+      ],
+      "earliest_effective_date": "2026-09-17"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/policies/POL-1001/vehicle-addition-proposals",
+    "status": 200,
+    "response": {
+      "kind": "rejected",
+      "code": "vehicle_already_on_policy",
+      "recovery": "escalate",
+      "message": "Vehicle 1HGCM82633A004352 is already on policy POL-1001. No change was applied."
+    },
+    "request": {
+      "vin": "1HGCM82633A004352",
+      "effective_date": "2026-09-18"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/policies/POL-2002",
+    "status": 200,
+    "response": {
+      "kind": "rejected",
+      "code": "policy_cancelled",
+      "recovery": "escalate",
+      "message": "Policy POL-2002 is cancelled. No change was applied."
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/policies/POL-2002/vehicle-addition-proposals",
+    "status": 200,
+    "response": {
+      "kind": "rejected",
+      "code": "policy_cancelled",
+      "recovery": "escalate",
+      "message": "Policy POL-2002 is cancelled. No change was applied."
+    },
+    "request": {
+      "vin": "1HGCM82633A004352",
+      "effective_date": "2026-09-18"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/policies/POL-3003/vehicle-addition-proposals",
+    "status": 200,
+    "response": {
+      "kind": "rejected",
+      "code": "effective_date_in_past",
+      "recovery": "ask_caller_again",
+      "message": "Effective date 2026-09-16 is before 2026-09-17. Ask the caller for an effective date of 2026-09-17 or later."
+    },
+    "request": {
+      "vin": "1HGCM82633A004352",
+      "effective_date": "2026-09-16"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/policies/POL-3003/vehicle-addition-proposals",
+    "status": 200,
+    "response": {
+      "kind": "confirmation_ready",
+      "proposal_id": "vap_01K5EPJ7R9QY6M8B4T2D3F1H0D",
+      "change": {
+        "type": "vehicle_addition",
+        "policy_number": "POL-3003",
+        "vin": "1HGCM82633A004352",
+        "effective_date": "2026-09-17"
+      },
+      "readback": "I will add the vehicle with V I N 1 H G C M 8 2 6 3 3 A 0 0 4 3 5 2 to policy P O L dash 3 0 0 3, effective September 17, 2026. Do you confirm this exact change?"
+    },
+    "request": {
+      "vin": "1HGCM82633A004352",
+      "effective_date": "2026-09-17"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/vehicle-addition-proposals/vap_01K5EPJ7R9QY6M8B4T2D3F1H0D/commit",
+    "status": 200,
+    "response": {
+      "kind": "rejected",
+      "code": "effective_date_in_past",
+      "recovery": "ask_caller_again",
+      "message": "Effective date 2026-09-17 is before 2026-09-18. Ask the caller for an effective date of 2026-09-18 or later."
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/policies/POL-3003",
+    "status": 200,
+    "response": {
+      "kind": "policy_found",
+      "policy_number": "POL-3003",
+      "vehicles": [],
+      "earliest_effective_date": "2026-09-18"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/policies/POL-1001/vehicle-addition-proposals",
+    "status": 200,
+    "response": {
+      "kind": "confirmation_ready",
+      "proposal_id": "vap_01K5EPJ7R9QY6M8B4T2D3F1H0E",
+      "change": {
+        "type": "vehicle_addition",
+        "policy_number": "POL-1001",
+        "vin": "2HGCM82633A004352",
+        "effective_date": "2026-09-18"
+      },
+      "readback": "I will add the vehicle with V I N 2 H G C M 8 2 6 3 3 A 0 0 4 3 5 2 to policy P O L dash 1 0 0 1, effective September 18, 2026. Do you confirm this exact change?"
+    },
+    "request": {
+      "vin": "2HGCM82633A004352",
+      "effective_date": "2026-09-18"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/vehicle-addition-proposals/vap_01K5EPJ7R9QY6M8B4T2D3F1H0E/commit",
+    "status": 200,
+    "response": {
+      "kind": "rejected",
+      "code": "policy_cancelled",
+      "recovery": "escalate",
+      "message": "Policy POL-1001 is cancelled. No change was applied."
+    }
+  }
+]

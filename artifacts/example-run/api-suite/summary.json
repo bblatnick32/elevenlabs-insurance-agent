@@ -1,0 +1,157 @@
+{
+  "run_id": "20260918T100740Z-a7eb5ad9",
+  "result": "pass",
+  "clock": "2026-09-17T20:45:12Z",
+  "timezone": "America/New_York",
+  "ports": [
+    56444
+  ],
+  "cases": [
+    {
+      "name": "contract_confirmation_ready",
+      "verdict": "pass"
+    },
+    {
+      "name": "contract_applied",
+      "verdict": "pass"
+    },
+    {
+      "name": "contract_rejected_policy_cancelled",
+      "verdict": "pass"
+    },
+    {
+      "name": "contract_rejected_effective_date_in_past",
+      "verdict": "pass"
+    },
+    {
+      "name": "parse_rejects_extra_ok",
+      "verdict": "pass"
+    },
+    {
+      "name": "healthz",
+      "verdict": "pass"
+    },
+    {
+      "name": "openapi_available",
+      "verdict": "pass"
+    },
+    {
+      "name": "openapi_lookup_schema",
+      "verdict": "pass"
+    },
+    {
+      "name": "openapi_propose_schema",
+      "verdict": "pass"
+    },
+    {
+      "name": "openapi_commit_schema",
+      "verdict": "pass"
+    },
+    {
+      "name": "unknown_policy_lookup",
+      "verdict": "pass"
+    },
+    {
+      "name": "unknown_policy_propose",
+      "verdict": "pass"
+    },
+    {
+      "name": "invalid_vin",
+      "verdict": "pass"
+    },
+    {
+      "name": "invalid_effective_date",
+      "verdict": "pass"
+    },
+    {
+      "name": "unknown_proposal",
+      "verdict": "pass"
+    },
+    {
+      "name": "pol_1001_lookup",
+      "verdict": "pass"
+    },
+    {
+      "name": "propose_rejects_unexpected_field",
+      "verdict": "pass"
+    },
+    {
+      "name": "propose_unexpected_field_no_proposal",
+      "verdict": "pass"
+    },
+    {
+      "name": "pol_1001_propose",
+      "verdict": "pass"
+    },
+    {
+      "name": "pol_1001_correct",
+      "verdict": "pass"
+    },
+    {
+      "name": "commit_rejects_caller_confirmed",
+      "verdict": "pass"
+    },
+    {
+      "name": "pol_1001_commit_superseded",
+      "verdict": "pass"
+    },
+    {
+      "name": "pol_1001_commit",
+      "verdict": "pass"
+    },
+    {
+      "name": "pol_1001_commit_replay",
+      "verdict": "pass"
+    },
+    {
+      "name": "pol_1001_one_vehicle",
+      "verdict": "pass"
+    },
+    {
+      "name": "pol_1001_duplicate_vin",
+      "verdict": "pass"
+    },
+    {
+      "name": "pol_2002_lookup",
+      "verdict": "pass"
+    },
+    {
+      "name": "pol_2002_propose",
+      "verdict": "pass"
+    },
+    {
+      "name": "pol_2002_no_mutation",
+      "verdict": "pass"
+    },
+    {
+      "name": "pol_3003_past_date",
+      "verdict": "pass"
+    },
+    {
+      "name": "pol_3003_same_day",
+      "verdict": "pass"
+    },
+    {
+      "name": "pol_3003_commit_after_clock",
+      "verdict": "pass"
+    },
+    {
+      "name": "pol_3003_no_mutation",
+      "verdict": "pass"
+    },
+    {
+      "name": "commit_recheck_propose",
+      "verdict": "pass"
+    },
+    {
+      "name": "commit_recheck_cancelled",
+      "verdict": "pass"
+    },
+    {
+      "name": "commit_recheck_no_mutation",
+      "verdict": "pass"
+    }
+  ],
+  "exchange_count": 25,
+  "git_commit": null
+}

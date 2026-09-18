@@ -1,0 +1,11 @@
+{
+  "kind": "confirmation_ready",
+  "proposal_id": "vap_01K5EPJ7R9QY6M8B4T2D3F1H0C",
+  "change": {
+    "type": "vehicle_addition",
+    "policy_number": "POL-1001",
+    "vin": "1HGCM82633A004352",
+    "effective_date": "2026-09-18"
+  },
+  "readback": "I will add the vehicle with V I N 1 H G C M 8 2 6 3 3 A 0 0 4 3 5 2 to policy P O L dash 1 0 0 1, effective September 18, 2026. Do you confirm this exact change?"
+}

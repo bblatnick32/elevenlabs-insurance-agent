@@ -1,0 +1,6 @@
+{
+  "kind": "rejected",
+  "code": "policy_cancelled",
+  "recovery": "escalate",
+  "message": "Policy POL-2002 is cancelled. No change was applied."
+}

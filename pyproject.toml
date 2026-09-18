@@ -1,0 +1,68 @@
+[project]
+name = "insurance-agent"
+version = "0.1.0"
+description = "Policy servicing HTTP API for an ElevenLabs voice agent"
+authors = [
+    { name = "Brandon Blatnick" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.141.1",
+    "httpx>=0.28.1",
+    "uvicorn>=0.53.0",
+]
+
+[project.scripts]
+verify = "verify.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.12.15,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = ["insurance_agent", "verify"]
+
+[tool.ruff]
+line-length = 88
+src = ["src"]
+
+[tool.ruff.lint]
+select = [
+    "ASYNC",
+    "B",
+    "C4",
+    "DTZ",
+    "E4",
+    "E7",
+    "E9",
+    "F",
+    "FAST",
+    "I",
+    "PERF",
+    "PIE",
+    "PTH",
+    "RUF",
+    "SIM",
+    "UP",
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["insurance_agent", "verify"]
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.basedpyright]
+include = ["src"]
+executionEnvironments = [{ root = "src" }]
+typeCheckingMode = "strict"
+failOnWarnings = true
+reportMatchNotExhaustive = "error"
+reportUnnecessaryTypeIgnoreComment = "error"
+reportUnusedFunction = "hint"
+
+[dependency-groups]
+dev = [
+    "basedpyright>=1.40.1",
+    "ruff>=0.16.8",
+]
