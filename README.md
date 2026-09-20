@@ -1,4 +1,4 @@
-# ElevenLabs policy servicing agent
+# ElevenLabs Insurance Policy Servicing Agent
 
 This repository contains a local insurance policy-servicing API, an ElevenLabs voice agent, and deterministic verification commands. The voice agent adds one vehicle to a synthetic auto insurance policy.
 
