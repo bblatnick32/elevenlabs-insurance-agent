@@ -1,0 +1,104 @@
+{
+  "type": "simulation",
+  "name": "05 backdated date is relayed, never substituted",
+  "simulation_scenario": "The caller gives policy number POL-3003 and VIN 1HGCM82633A004352, and asks for effective date 2026-09-16, which the API rejects as being in the past. The caller then supplies 2026-09-17. The agent must not commit until the caller gives a clear yes to the new readback.",
+  "success_conditions": [
+    "The agent relayed that 2026-09-16 is before 2026-09-17 and asked the caller to choose a date of 2026-09-17 or later.",
+    "The agent did not pick a replacement date on the caller's behalf.",
+    "The agent called propose_vehicle_addition again only after the caller supplied 2026-09-17.",
+    "The agent did not call commit_vehicle_addition before a clear yes to the new readback."
+  ],
+  "simulation_max_turns": 24,
+  "tool_mock_config": {
+    "mocking_strategy": "all",
+    "fallback_strategy": "raise_error"
+  },
+  "tool_mock_overrides": {
+    "tool_5401m2v7pecder5ashbj2e4h4h4e": [
+      {
+        "mock_result": "{\"kind\":\"policy_found\",\"policy_number\":\"POL-3003\",\"vehicles\":[],\"earliest_effective_date\":\"2026-09-17\"}",
+        "is_error": false,
+        "parameter_conditions": [
+          {
+            "path": "policy_number",
+            "eval": {
+              "type": "exact",
+              "expected_value": "POL-3003"
+            }
+          }
+        ]
+      }
+    ],
+    "tool_9301m2v7pej7e7w9e012sgs4mgs3": [
+      {
+        "mock_result": "{\"kind\":\"rejected\",\"code\":\"effective_date_in_past\",\"recovery\":\"ask_caller_again\",\"message\":\"Effective date 2026-09-16 is before 2026-09-17. Ask the caller for an effective date of 2026-09-17 or later.\"}",
+        "is_error": false,
+        "parameter_conditions": [
+          {
+            "path": "policy_number",
+            "eval": {
+              "type": "exact",
+              "expected_value": "POL-3003"
+            }
+          },
+          {
+            "path": "vin",
+            "eval": {
+              "type": "exact",
+              "expected_value": "1HGCM82633A004352"
+            }
+          },
+          {
+            "path": "effective_date",
+            "eval": {
+              "type": "exact",
+              "expected_value": "2026-09-16"
+            }
+          }
+        ]
+      },
+      {
+        "mock_result": "{\"kind\":\"confirmation_ready\",\"proposal_id\":\"vap_01K5EPJ7R9QY6M8B4T2D3F1H0D\",\"change\":{\"type\":\"vehicle_addition\",\"policy_number\":\"POL-3003\",\"vin\":\"1HGCM82633A004352\",\"effective_date\":\"2026-09-17\"},\"readback\":\"I will add the vehicle with V I N 1 H G C M 8 2 6 3 3 A 0 0 4 3 5 2 to policy P O L dash 3 0 0 3, effective September 17, 2026. Do you confirm this exact change?\"}",
+        "is_error": false,
+        "parameter_conditions": [
+          {
+            "path": "policy_number",
+            "eval": {
+              "type": "exact",
+              "expected_value": "POL-3003"
+            }
+          },
+          {
+            "path": "vin",
+            "eval": {
+              "type": "exact",
+              "expected_value": "1HGCM82633A004352"
+            }
+          },
+          {
+            "path": "effective_date",
+            "eval": {
+              "type": "exact",
+              "expected_value": "2026-09-17"
+            }
+          }
+        ]
+      }
+    ],
+    "tool_1001m2v7peqder9v1bwrv9wymr8h": [
+      {
+        "mock_result": "{\"kind\":\"applied\",\"proposal_id\":\"vap_01K5EPJ7R9QY6M8B4T2D3F1H0D\",\"confirmation_number\":\"CHG-2026-0917-0033\",\"change\":{\"type\":\"vehicle_addition\",\"policy_number\":\"POL-3003\",\"vin\":\"1HGCM82633A004352\",\"effective_date\":\"2026-09-17\"},\"applied_at\":\"2026-09-17T20:45:12Z\"}",
+        "is_error": false,
+        "parameter_conditions": [
+          {
+            "path": "proposal_id",
+            "eval": {
+              "type": "exact",
+              "expected_value": "vap_01K5EPJ7R9QY6M8B4T2D3F1H0D"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

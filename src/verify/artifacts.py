@@ -27,6 +27,15 @@ def repo_root() -> Path:
 
 def git_commit(root: Path) -> str | None:
     try:
+        status = subprocess.run(
+            ["git", "status", "--porcelain"],
+            cwd=root,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if status.returncode != 0 or status.stdout.strip():
+            return None
         completed = subprocess.run(
             ["git", "rev-parse", "HEAD"],
             cwd=root,

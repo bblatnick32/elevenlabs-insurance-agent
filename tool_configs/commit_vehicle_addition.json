@@ -1,0 +1,41 @@
+{
+  "assignments": [],
+  "description": "Apply the latest proposal. Takes only proposal_id. Call only after a verbatim readback and a clear unqualified yes. Returns kind applied or kind rejected.",
+  "disable_interruptions": false,
+  "dynamic_variables": {
+    "dynamic_variable_placeholders": {}
+  },
+  "execution_mode": "immediate",
+  "expects_response": true,
+  "force_pre_tool_speech": false,
+  "interruption_mode": "allow",
+  "name": "commit_vehicle_addition",
+  "parameters": {
+    "description": "",
+    "dynamic_variable": "",
+    "is_omitted": false,
+    "properties": {
+      "proposal_id": {
+        "allowed_values": null,
+        "allowed_values_dynamic_variable": "",
+        "constant_value": "",
+        "description": "proposal_id from the most recent confirmation_ready result.",
+        "dynamic_variable": "",
+        "enum": null,
+        "is_omitted": false,
+        "is_system_provided": false,
+        "type": "string"
+      }
+    },
+    "required": [
+      "proposal_id"
+    ],
+    "type": "object"
+  },
+  "pre_tool_speech": "auto",
+  "response_timeout_secs": 20,
+  "tool_call_sound": null,
+  "tool_call_sound_behavior": "auto",
+  "tool_error_handling_mode": "passthrough",
+  "type": "client"
+}

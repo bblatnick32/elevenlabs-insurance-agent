@@ -1,0 +1,41 @@
+{
+  "assignments": [],
+  "description": "Look up an auto policy by policy number. Returns kind policy_found or kind rejected. Call this first.",
+  "disable_interruptions": false,
+  "dynamic_variables": {
+    "dynamic_variable_placeholders": {}
+  },
+  "execution_mode": "immediate",
+  "expects_response": true,
+  "force_pre_tool_speech": false,
+  "interruption_mode": "allow",
+  "name": "lookup_policy",
+  "parameters": {
+    "description": "",
+    "dynamic_variable": "",
+    "is_omitted": false,
+    "properties": {
+      "policy_number": {
+        "allowed_values": null,
+        "allowed_values_dynamic_variable": "",
+        "constant_value": "",
+        "description": "Policy number exactly as the caller stated it.",
+        "dynamic_variable": "",
+        "enum": null,
+        "is_omitted": false,
+        "is_system_provided": false,
+        "type": "string"
+      }
+    },
+    "required": [
+      "policy_number"
+    ],
+    "type": "object"
+  },
+  "pre_tool_speech": "auto",
+  "response_timeout_secs": 20,
+  "tool_call_sound": null,
+  "tool_call_sound_behavior": "auto",
+  "tool_error_handling_mode": "passthrough",
+  "type": "client"
+}

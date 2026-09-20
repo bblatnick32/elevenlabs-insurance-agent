@@ -10,18 +10,21 @@ dependencies = [
     "elevenlabs>=2.68.0",
     "fastapi>=0.141.1",
     "httpx>=0.28.1",
+    "pyaudio>=0.2.14; sys_platform == 'darwin'",
+    "python-dotenv>=1.2.3",
     "uvicorn>=0.53.0",
 ]
 
 [project.scripts]
 verify = "verify.cli:main"
+agent = "agent.cli:main"
 
 [build-system]
 requires = ["uv_build>=0.12.15,<0.13.0"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
-module-name = ["insurance_agent", "verify"]
+module-name = ["insurance_backend", "verify", "agent"]
 
 [tool.ruff]
 line-length = 88
@@ -48,13 +51,13 @@ select = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["insurance_agent", "verify"]
+known-first-party = ["insurance_backend", "verify", "agent"]
 
 [tool.ruff.format]
 docstring-code-format = true
 
 [tool.basedpyright]
-include = ["src"]
+include = ["src", "tests"]
 executionEnvironments = [{ root = "src" }]
 typeCheckingMode = "strict"
 failOnWarnings = true

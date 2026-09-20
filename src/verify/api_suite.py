@@ -1,18 +1,17 @@
 import json
 import shutil
 import threading
-import time
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import httpx
 import uvicorn
-from fastapi import FastAPI
 from pydantic import ValidationError
 
-from insurance_agent.http import create_app, parse_api_result
-from insurance_agent.store import Store
+from insurance_backend.http import create_app, parse_api_result
+from insurance_backend.server import start_server, stop_server
+from insurance_backend.store import Store
 from verify.artifacts import Json, git_commit, repo_root, utc_stamp, write_json
 
 FIXED_INSTANT = datetime(2026, 9, 17, 20, 45, 12, tzinfo=UTC)
@@ -160,40 +159,6 @@ def discriminated_schema(
         "variants": len(variants) if isinstance(variants, list) else 0,
         "discriminator": property_name,
     }
-
-
-def bound_port(server: uvicorn.Server) -> int | None:
-    for http_server in server.servers:
-        for socket in http_server.sockets:
-            return int(socket.getsockname()[1])
-    return None
-
-
-def start_server(app: FastAPI) -> tuple[uvicorn.Server, threading.Thread, int]:
-    config = uvicorn.Config(
-        app,
-        host="127.0.0.1",
-        port=0,
-        log_level="warning",
-        access_log=False,
-    )
-    server = uvicorn.Server(config)
-    thread = threading.Thread(target=server.run, daemon=True)
-    thread.start()
-    deadline = time.monotonic() + 5
-    port = None
-    while time.monotonic() < deadline:
-        if server.started:
-            port = bound_port(server)
-            if port is not None:
-                return server, thread, port
-        time.sleep(0.01)
-    raise RuntimeError("uvicorn did not bind an ephemeral port")
-
-
-def stop_server(server: uvicorn.Server, thread: threading.Thread) -> None:
-    server.should_exit = True
-    thread.join(timeout=5)
 
 
 def run_api_suite(*, promote: bool) -> int:

@@ -1,0 +1,65 @@
+{
+  "assignments": [],
+  "description": "Propose adding one vehicle. Returns kind confirmation_ready with a readback to speak verbatim, or kind rejected. Required body fields are vin and effective_date.",
+  "disable_interruptions": false,
+  "dynamic_variables": {
+    "dynamic_variable_placeholders": {}
+  },
+  "execution_mode": "immediate",
+  "expects_response": true,
+  "force_pre_tool_speech": false,
+  "interruption_mode": "allow",
+  "name": "propose_vehicle_addition",
+  "parameters": {
+    "description": "",
+    "dynamic_variable": "",
+    "is_omitted": false,
+    "properties": {
+      "effective_date": {
+        "allowed_values": null,
+        "allowed_values_dynamic_variable": "",
+        "constant_value": "",
+        "description": "YYYY-MM-DD supplied by the caller. Never substitute a date.",
+        "dynamic_variable": "",
+        "enum": null,
+        "is_omitted": false,
+        "is_system_provided": false,
+        "type": "string"
+      },
+      "policy_number": {
+        "allowed_values": null,
+        "allowed_values_dynamic_variable": "",
+        "constant_value": "",
+        "description": "Policy number confirmed by lookup_policy.",
+        "dynamic_variable": "",
+        "enum": null,
+        "is_omitted": false,
+        "is_system_provided": false,
+        "type": "string"
+      },
+      "vin": {
+        "allowed_values": null,
+        "allowed_values_dynamic_variable": "",
+        "constant_value": "",
+        "description": "17-character VIN exactly as the caller stated it. Never pad or repair.",
+        "dynamic_variable": "",
+        "enum": null,
+        "is_omitted": false,
+        "is_system_provided": false,
+        "type": "string"
+      }
+    },
+    "required": [
+      "policy_number",
+      "vin",
+      "effective_date"
+    ],
+    "type": "object"
+  },
+  "pre_tool_speech": "auto",
+  "response_timeout_secs": 20,
+  "tool_call_sound": null,
+  "tool_call_sound_behavior": "auto",
+  "tool_error_handling_mode": "passthrough",
+  "type": "client"
+}
