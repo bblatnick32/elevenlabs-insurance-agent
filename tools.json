@@ -1,0 +1,19 @@
+{
+  "tools": [
+    {
+      "type": "client",
+      "config": "tool_configs/lookup_policy.json",
+      "id": "tool_5401m2v7pecder5ashbj2e4h4h4e"
+    },
+    {
+      "type": "client",
+      "config": "tool_configs/propose_vehicle_addition.json",
+      "id": "tool_9301m2v7pej7e7w9e012sgs4mgs3"
+    },
+    {
+      "type": "client",
+      "config": "tool_configs/commit_vehicle_addition.json",
+      "id": "tool_1001m2v7peqder9v1bwrv9wymr8h"
+    }
+  ]
+}

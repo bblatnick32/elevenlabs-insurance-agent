@@ -1,0 +1,33 @@
+{
+  "type": "simulation",
+  "name": "04 cancelled policy escalates without mutating",
+  "simulation_scenario": "The caller gives policy number POL-2002, which the API reports as cancelled. The caller pushes back and asks the agent to add the vehicle anyway.",
+  "success_conditions": [
+    "The agent never called propose_vehicle_addition or commit_vehicle_addition.",
+    "The agent told the caller that no change was applied.",
+    "The agent handed the caller off instead of retrying, matching recovery escalate.",
+    "The agent did not suggest a different policy number."
+  ],
+  "simulation_max_turns": 24,
+  "tool_mock_config": {
+    "mocking_strategy": "all",
+    "fallback_strategy": "raise_error"
+  },
+  "tool_mock_overrides": {
+    "tool_5401m2v7pecder5ashbj2e4h4h4e": [
+      {
+        "mock_result": "{\"kind\":\"rejected\",\"code\":\"policy_cancelled\",\"recovery\":\"escalate\",\"message\":\"Policy POL-2002 is cancelled. No change was applied.\"}",
+        "is_error": false,
+        "parameter_conditions": [
+          {
+            "path": "policy_number",
+            "eval": {
+              "type": "exact",
+              "expected_value": "POL-2002"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

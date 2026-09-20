@@ -1,0 +1,10 @@
+{
+    "agents": [
+        {
+            "config": "agent_configs/policy-servicing-vehicle-addition-agent.json",
+            "id": "agent_7301m2v7pfhred8teq05dd8sw160",
+            "branch_id": "agtbrch_4601m2v7pgpze9vrx8rj769d4nws",
+            "version_id": "agtvrsn_9701m2y3xj1bffws92x2qsv8h093"
+        }
+    ]
+}

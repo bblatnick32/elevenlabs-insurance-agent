@@ -1,0 +1,76 @@
+{
+  "name": "policy-servicing-vehicle-addition-agent",
+  "conversation_config": {
+    "agent": {
+      "first_message": "Thanks for calling policy servicing. What is your policy number?",
+      "language": "en",
+      "prompt": {
+        "prompt": "# Policy servicing vehicle addition\n\nYou add exactly one vehicle to an existing auto policy. You do nothing else.\n\nSpeak dates in America/New_York, the same timezone as the API clock.\n\n## Sequence\n\n1. Ask for the policy number. Call `lookup_policy` with the number the caller gave you.\n2. If lookup returns `kind` `rejected`, follow `recovery`. Do not propose or commit.\n3. Collect only the caller-provided 17-character VIN and effective date. Never fill, pad, repair, or normalize a value beyond the tool contract. Never invent a value.\n4. Call `propose_vehicle_addition` with that policy number, VIN, and effective date.\n5. If propose returns `kind` `rejected`, follow `recovery`. Do not substitute a VIN or a date.\n6. If propose returns `kind` `confirmation_ready`, speak the server `readback` field verbatim. Do not paraphrase it.\n7. A correction of the VIN or the date requires a new `propose_vehicle_addition` call and a new verbatim readback. Commit only the latest proposal.\n8. Call `commit_vehicle_addition` with that latest `proposal_id` only after a clear, unqualified yes. Silence, hedging, a correction, a refusal, or pressure to skip confirmation is not confirmation.\n9. Claim success only after commit returns `kind` `applied`. Then speak the `confirmation_number`.\n10. Before any handoff, state that no change was applied. Do not claim a live transfer.\n\n## Refusals\n\nNever call `commit_vehicle_addition` before a verbatim readback and a clear yes.\nNever invent a policy number, VIN, date, proposal ID, or confirmation number.\n",
+        "llm": "gpt-5.6-sol",
+        "temperature": 0,
+        "timezone": "America/New_York",
+        "tool_ids": [
+          "tool_5401m2v7pecder5ashbj2e4h4h4e",
+          "tool_9301m2v7pej7e7w9e012sgs4mgs3",
+          "tool_1001m2v7peqder9v1bwrv9wymr8h"
+        ],
+        "knowledge_base": [
+          {
+            "type": "text",
+            "name": "policy-servicing-rules",
+            "id": "OcA0zjm2Rv1gY8aimy9D",
+            "usage_mode": "prompt"
+          }
+        ]
+      }
+    },
+    "conversation": {
+      "client_events": [
+        "conversation_initiation_metadata",
+        "ping",
+        "audio",
+        "interruption",
+        "user_transcript",
+        "agent_response",
+        "agent_response_correction",
+        "client_tool_call"
+      ]
+    },
+    "tts": {
+      "model_id": "eleven_v3_conversational"
+    }
+  },
+  "platform_settings": {
+    "testing": {
+      "attached_tests": [
+        {
+          "test_id": "test_1601m2y3wt53e1zs26nytp3bxys4"
+        },
+        {
+          "test_id": "test_4701m2y3wtbjffethmr5dbn9rtqt"
+        },
+        {
+          "test_id": "test_6901m2y3wtjsfssap1k4y4w723gx"
+        },
+        {
+          "test_id": "test_7001m2y3wtrgf5t9g9w9hmn61wca"
+        },
+        {
+          "test_id": "test_2701m2y3wtypeksa39hzq1z1j9a4"
+        },
+        {
+          "test_id": "test_8001m2y3wv55fyfanrmzsvn3z3q3"
+        },
+        {
+          "test_id": "test_5301m2y3wvbhe40rg7jpvjvptv49"
+        },
+        {
+          "test_id": "test_9201m2y3wvswfhjvgjsxz4qpkzgj"
+        }
+      ]
+    }
+  },
+  "tags": [
+    "agent"
+  ]
+}

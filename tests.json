@@ -1,0 +1,44 @@
+{
+    "tests": [
+        {
+            "config": "test_configs/01-happy-path.json",
+            "type": "simulation",
+            "id": "test_1601m2y3wt53e1zs26nytp3bxys4"
+        },
+        {
+            "config": "test_configs/02-date-correction.json",
+            "type": "simulation",
+            "id": "test_4701m2y3wtbjffethmr5dbn9rtqt"
+        },
+        {
+            "config": "test_configs/03-declines-confirmation.json",
+            "type": "tool",
+            "id": "test_6901m2y3wtjsfssap1k4y4w723gx"
+        },
+        {
+            "config": "test_configs/04-cancelled-policy.json",
+            "type": "simulation",
+            "id": "test_7001m2y3wtrgf5t9g9w9hmn61wca"
+        },
+        {
+            "config": "test_configs/05-backdated-date.json",
+            "type": "simulation",
+            "id": "test_2701m2y3wtypeksa39hzq1z1j9a4"
+        },
+        {
+            "config": "test_configs/06-unknown-policy.json",
+            "type": "simulation",
+            "id": "test_8001m2y3wv55fyfanrmzsvn3z3q3"
+        },
+        {
+            "config": "test_configs/07-garbled-vin.json",
+            "type": "simulation",
+            "id": "test_5301m2y3wvbhe40rg7jpvjvptv49"
+        },
+        {
+            "config": "test_configs/08-pressure-to-skip.json",
+            "type": "tool",
+            "id": "test_9201m2y3wvswfhjvgjsxz4qpkzgj"
+        }
+    ]
+}
